@@ -1,32 +1,11 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 09/10/2021 03:02:05 PM
-// Design Name: 
-// Module Name: pmic_tb
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
+// Engineer: Zaheer Ahmad
+// Description: PMIC Design Testbench
 
 //`include "./../rtl/PMIC_Code.v"
 
-//`timescale 1ns/1ps
-
 module pmic_tb;
-
-    // localparam T=1000000;
     
     reg clk, reset, pwr_up, pwr_dn, error;
     reg [4:0] trigger;
@@ -46,19 +25,8 @@ module pmic_tb;
 	forever #5 clk=~clk;
 	//#500 $finish;
 	end
-
-/*    initial begin
-        reset = 1'b1;
-    end
-
-    initial begin
-	$dumpfile("wave.vcd");
-	$dumpvars();
-    end
-*/
     
    initial begin
-        //#1000000;
 	    reset = 1'b0;
 	    error = 1'b0;
         pwr_up = 1'b0;

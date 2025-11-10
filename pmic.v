@@ -1,28 +1,9 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 09/10/2021 03:00:19 PM
-// Design Name: 
-// Module Name: pmic
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
+ 
+// Engineer: Zaheer Ahmad
+// Description: PMIC Design
 
 module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
-
-    // parameter N=15;
 
     input wire clk, reset, pwr_up, pwr_dn, error;
     input wire [4:0] trigger;
@@ -35,15 +16,12 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
     reg [4:0] counter;
     reg [26:0] clock_count;
     reg irq;
-//    reg itr;
-//    wire output_display;
     reg [1:0] sel;
     
     wire one_second_enable;
     reg [7:0] displayed_number;
     reg [3:0] LED_BCD;
     reg [19:0] refresh_counter;
-//    wire [1:0] LED_activating_counter;
     
     parameter [1:0]	
 		    s0       = 2'b00,
@@ -60,44 +38,34 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
     begin
         if(~reset) begin 
             current_state <= s0;
-            // sig_ldo_en <= 7'd0;
-            // reset_count <= 1'b0;
-            // next_state <= s0;
             ldo_en <= 7'd0;
-//            one_second_counter = 0;
         end
         else begin
-            //reset_count <= 1'b1;
             current_state <= next_state;
             ldo_en <= sig_ldo_en;
         end
             
     end  
     assign temp = (ldo_en << 1);
+
     always @ (*)
         begin
-                sig_ldo_en = ldo_en;
-                next_state = current_state;
+            sig_ldo_en = ldo_en;
+            next_state = current_state;
             case(current_state)
                 s0:         begin
                             reset_count = 1'b0;
                             sig_ldo_en = 7'd0;
-//                            seg = 7'b0000001;
                             if (pwr_up) begin 
                                 next_state = power_up; 
                                 
                             end
                             else begin 
-//                                LED_BCD = 4'b0000;
-//                                seg = 7'b0000001;
-//                                Anode_Activate = 4'b0100;
                                 next_state = s0;
                             end
                 end
                 power_up:   begin
                             reset_count = 1'b1;
-//                            seg = 7'b1001111;
-//                            Anode_Activate = 4'b0111;
                             if (error) begin 
                                 next_state = s0; 
                             end
@@ -107,13 +75,11 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                                     next_state = active; 
                                     reset_count = 0;		
                                 end
-                                else begin //ldo_en[counter] <= 1;
-                                    //counter <= counter + 1;
+                                else begin
                                     if (irq) begin
                                         sig_ldo_en[6:1] = temp[6:1] ;
                                         sig_ldo_en[0] = 1'b1; 
                                     end
-                                    // #1000000;
                                     next_state = power_up;
                                 end
                             end
@@ -121,8 +87,6 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                 active:     begin 
                                 reset_count = 1'b1;
                                 sig_ldo_en = ldo_en;
-//                                seg = 7'b0010010;
-//                                Anode_Activate = 4'b0111;
                             if(error) begin 
                                     next_state = s0; 
                             end
@@ -131,7 +95,6 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                                 if (counter > 5'd9) begin
                                     if (pwr_dn || (counter == trigger)) begin
                                         next_state = power_dn; 
-                                        // #20000000;
                                         reset_count = 1'b0;		
                                     end
                                     else begin 
@@ -142,12 +105,9 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                                 else
                                     next_state = active;
                             end
-                end
-                                
+                end       
                 power_dn:   begin
                             reset_count = 1'b1;
-//                            seg = 7'b0000110;
-//                            Anode_Activate = 4'b0111;
                             if (error) begin 
                                     next_state = s0; 
                             end
@@ -157,13 +117,11 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                                     next_state = s0; 
                                 end
                                 else begin 
-                                    //counter <= counter + 1'b1; 
                                     if (irq) begin
                                         sig_ldo_en = (ldo_en << 1);
                                     end
                                     else
                                         sig_ldo_en = ldo_en;
-                                    // #1000000;
                                     next_state = power_dn;		
                                 end
                             end
@@ -171,7 +129,6 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
             endcase
             
          end
-
 
     always @ (posedge clk)
     begin
@@ -191,7 +148,7 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                 clock_count <= 27'd0;    
             end
         
-            end
+        end
     end
     
     assign one_second_enable = (clock_count == 27'd99999999)?1:0;
@@ -211,12 +168,10 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                         sel <= 2'b00;
                       end
                     else    begin
-//                            itr <= 1'b0;
                             refresh_counter <= refresh_counter + 1;
                             
                             if (refresh_counter == 20'd500000) begin
                                 refresh_counter <= 20'd0;
-//                                itr <= 1'b1;
                                 if(sel == 2'b10)
                                     sel <= 2'b00;
                                 else
@@ -224,10 +179,7 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                             end
                     end
                      
-            end
-    
-//        assign LED_activating_counter = refresh_counter[11:10];
-        
+            end        
         
         always @( sel or current_state or displayed_number or reset)
             begin
@@ -241,111 +193,41 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                                         Anode_Activate = 4'b1110; 
                                         // activate LED4 and Deactivate LED2, LED3, LED1
                                         LED_BCD = ((displayed_number % 1000)%100)%10;
-                                        // the fourth digit of the 16-bit number    
-//                                      if(itr)
-//                                           sel = 2'b01;
+                                        // the fourth digit of the 16-bit number   
                                     end
                         2'b01:      begin
                                         Anode_Activate = 4'b1101; 
                                         // activate LED3 and Deactivate LED2, LED1, LED4
                                         LED_BCD = ((displayed_number % 1000)%100)/10;
                                         // the third digit of the 16-bit number
-//                                      if(itr)
-//                                        sel = 2'b11;
                                     end
                         2'b10:      begin
                                         Anode_Activate = 4'b0111;
                                         case(current_state)
                                                 s0:         begin
                                                                 LED_BCD = 4'b0000;
-                                //                                seg = 7'b0000001;
-//                                                                Anode_Activate = 4'b0111;
                                                         end
                                                 power_up:   begin
-                                //                                seg = 7'b1001111;
                                                                 LED_BCD = 4'b0001;
-//                                                                Anode_Activate = 4'b0111;
                                                         end
                                                 active:     begin
-                                //                                seg = 7'b0010010;
                                                                 LED_BCD = 4'b0010;
-//                                                                Anode_Activate = 4'b0111;
                                                         end
                                                 power_dn:     begin
-                                //                                seg = 7'b0000110;
                                                                 LED_BCD = 4'b0011;
-//                                                                Anode_Activate = 4'b0111;
-//                                                                sel <= 2'b00;
                                                         end
                                                  default:
                                                         LED_BCD = 'd0;
                                             endcase
                                    end
-                                   default: begin
+                        default: begin
                                         Anode_Activate = 4'b0100;
                                         LED_BCD = 'd0;
                                         end
            endcase
            end
         end
-        
-        
-//    always @(*)
-//        begin
-//            case(current_state)
-//                s0:         begin
-//                                LED_BCD = 4'b0000;
-////                                seg = 7'b0000001;
-//                                Anode_Activate = 4'b0111;
-//                        end
-//                power_up:   begin
-////                                seg = 7'b1001111;
-//                                LED_BCD = 4'b0001;
-//                                Anode_Activate = 4'b0111;
-//                        end
-//                active:     begin
-////                                seg = 7'b0010010;
-//                                LED_BCD = 4'b0010;
-//                                Anode_Activate = 4'b0111;
-//                        end
-//                power_dn:     begin
-////                                seg = 7'b0000110;
-//                                LED_BCD = 4'b0011;
-//                                Anode_Activate = 4'b0111;
-//                        end
-//            endcase
-//        end
-        
-//      always @(*)
-//            begin
-//                case(LED_activating_counter)
-////                2'b00: begin
-////                    Anode_Activate = 4'b0111; 
-////                    // activate LED1 and Deactivate LED2, LED3, LED4
-////                    LED_BCD = displayed_number/1000;
-////                    // the first digit of the 16-bit number
-////                      end
-////                2'b01: begin
-////                    Anode_Activate = 4'b1011; 
-////                    // activate LED2 and Deactivate LED1, LED3, LED4
-////                    LED_BCD = (displayed_number % 1000)/100;
-////                    // the second digit of the 16-bit number
-////                      end
-//                2'b01: begin
-//                    Anode_Activate = 4'b1101; 
-//                    // activate LED3 and Deactivate LED2, LED1, LED4
-//                    LED_BCD = ((displayed_number % 1000)%100)/10;
-//                    // the third digit of the 16-bit number
-//                        end
-//                2'b00: begin
-//                    Anode_Activate = 4'b1110; 
-//                    // activate LED4 and Deactivate LED2, LED3, LED1
-//                    LED_BCD = ((displayed_number % 1000)%100)%10;
-//                    // the fourth digit of the 16-bit number    
-//                       end
-//                endcase
-//            end
-              
+
        always @(*)
                 begin
                     case(LED_BCD)
@@ -362,6 +244,5 @@ module pmic (clk, reset,pwr_up,pwr_dn,error,ldo_en,trigger,seg,Anode_Activate);
                     default: seg = 7'b0000001; // "0"
                     endcase
                 end         
-    
 
 endmodule
