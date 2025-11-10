@@ -2,7 +2,7 @@
 
 This is a RTL design for FSM implementation on Basys3 board.
 
-# File Structure
+## File Structure
 
 doc/PMIC_FSM.odt: The document that contain the description of FSM
 pmic.v: PMIC module
